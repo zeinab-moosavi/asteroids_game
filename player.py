@@ -1,5 +1,5 @@
 from circleshape import CircleShape
-from constants import PLAYER_RADIUS, LINE_WIDTH, PLAYER_TURN_SPEED, PLAYER_FRICTION, PLAYER_ACCELERATION,  PLAYER_SHOOT_SPEED, SHOT_RADIUS, PLAYER_SHOOT_COOLDOWN_SECONDS
+from constants import PLAYER_RADIUS, LINE_WIDTH, PLAYER_TURN_SPEED, PLAYER_FRICTION, PLAYER_ACCELERATION,  PLAYER_SHOOT_SPEED, SHOT_RADIUS, PLAYER_SHOOT_COOLDOWN_SECONDS, SCREEN_WIDTH, SCREEN_HEIGHT
 import pygame
 from shot import Shot
 class Player(CircleShape):
@@ -41,6 +41,8 @@ class Player(CircleShape):
         self.velocity *= (1 - PLAYER_FRICTION * dt)
         # Update the actual position
         self.position += self.velocity * dt
+        # Wrap around screen
+        self.wrap_position(SCREEN_WIDTH, SCREEN_HEIGHT)
         if keys[pygame.K_SPACE]:
             if self.shot_cooldown_timer <= 0:
                 self.shot_cooldown_timer =  PLAYER_SHOOT_COOLDOWN_SECONDS

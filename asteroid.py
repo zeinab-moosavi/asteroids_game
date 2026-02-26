@@ -1,6 +1,6 @@
 from circleshape import CircleShape
 from logger import log_event
-from constants import LINE_WIDTH, ASTEROID_MIN_RADIUS, POINTS_SPLIT, POINTS_DESTROY
+from constants import LINE_WIDTH, ASTEROID_MIN_RADIUS, POINTS_SPLIT, POINTS_DESTROY, SCREEN_WIDTH, SCREEN_HEIGHT
 import pygame
 import random
 from score import Score
@@ -11,7 +11,9 @@ class Asteroid(CircleShape):
     def draw(self, surface):
         pygame.draw.circle(surface, "white", self.position, self.radius, LINE_WIDTH)
     def update(self, dt):
-        self.position += self.velocity * dt 
+        self.position += self.velocity * dt
+        # Wrap around screen
+        self.wrap_position(SCREEN_WIDTH, SCREEN_HEIGHT)
     def split(self, score):
         ExplosionRing(self.position.x, self.position.y, self.radius * 2)
         self.kill()
