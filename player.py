@@ -1,5 +1,5 @@
 from circleshape import CircleShape
-from constants import PLAYER_RADIUS, LINE_WIDTH, PLAYER_TURN_SPEED, PLAYER_SPEED, PLAYER_SHOOT_SPEED, SHOT_RADIUS, PLAYER_SHOOT_COOLDOWN_SECONDS
+from constants import PLAYER_RADIUS, LINE_WIDTH, PLAYER_TURN_SPEED, PLAYER_FRICTION, PLAYER_ACCELERATION,  PLAYER_SHOOT_SPEED, SHOT_RADIUS, PLAYER_SHOOT_COOLDOWN_SECONDS
 import pygame
 from shot import Shot
 class Player(CircleShape):
@@ -8,6 +8,7 @@ class Player(CircleShape):
         self.rotation = 0
         self.shot_cooldown_timer = 0
         self.invincible_timer = 0
+        self.velocity = pygame.Vector2(0, 0)
     def triangle(self):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         right = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
@@ -20,27 +21,30 @@ class Player(CircleShape):
     def rotate(self, dt):
         self.rotation += PLAYER_TURN_SPEED * dt
     def update(self, dt):
+        # 1. Handle Timers
         if self.invincible_timer > 0:
             self.invincible_timer -= dt
+        self.shot_cooldown_timer -= dt
+        # 2. Handle Rotation (Input)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
             self.rotate(-dt)
         if keys[pygame.K_d]:
            self.rotate(dt)
+        # 3. Handle Acceleration (Input)
+        forward = pygame.Vector2(0, 1).rotate(self.rotation)
         if keys[pygame.K_w]:
-            self.move(dt)
+            self.velocity += forward * PLAYER_ACCELERATION * dt
         if keys[pygame.K_s]:
-            self.move(-dt)
+            self.velocity -= forward * PLAYER_ACCELERATION * dt
+        # 4. Handle Physics (Movement and Friction)
+        self.velocity *= (1 - PLAYER_FRICTION * dt)
+        # Update the actual position
+        self.position += self.velocity * dt
         if keys[pygame.K_SPACE]:
             if self.shot_cooldown_timer <= 0:
                 self.shot_cooldown_timer =  PLAYER_SHOOT_COOLDOWN_SECONDS
                 self.shoot()
-        self.shot_cooldown_timer -= dt
-    def move(self, dt):
-        unit_vector = pygame.Vector2(0, 1)
-        rotated_vector = unit_vector.rotate(self.rotation)
-        rotated_with_speed_vector = rotated_vector * PLAYER_SPEED * dt
-        self.position += rotated_with_speed_vector
     def shoot(self):
         shot = Shot(self.position.x, self.position.y , SHOT_RADIUS)
         shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
