@@ -7,6 +7,7 @@ from shot import Shot
 from score import Score
 from asteroidField import AsteroidField
 from lives import Lives
+from explosion import ExplosionRing
 import sys
 def main():
     pygame.init()
@@ -20,6 +21,7 @@ def main():
     Shot.containers = (shots, updatable, drawables)
     Score.containers = (drawables, updatable)
     Lives.containers = (drawables, updatable)
+    ExplosionRing.containers = (updatable, drawables)
     AsteroidField.containers = (updatable)
     Asteroid.containers = (asteroids, updatable, drawables)
     Player.containers = (updatable, drawables)
@@ -37,7 +39,7 @@ def main():
             drawable.draw(screen) 
         updatable.update(dt)
         for asteroid  in asteroids:
-            if asteroid.collides_with(player):
+            if asteroid.collides_with(player) and not player.is_invincible():
                 log_event("player_hit")
                 lives.lose_one()
                 if lives.is_alive():
@@ -46,6 +48,7 @@ def main():
                     player.position.y = SCREEN_HEIGHT / 2
                     player.velocity.x = 0
                     player.velocity.y = 0
+                    player.make_invincible(2)
                 else:
                     print("Game over!")
                     sys.exit()

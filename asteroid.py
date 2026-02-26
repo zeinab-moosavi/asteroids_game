@@ -4,6 +4,7 @@ from constants import LINE_WIDTH, ASTEROID_MIN_RADIUS, POINTS_SPLIT, POINTS_DEST
 import pygame
 import random
 from score import Score
+from explosion import ExplosionRing
 class Asteroid(CircleShape):
     def __init__(self, x, y, radius):
         super().__init__(x, y, radius)
@@ -12,6 +13,7 @@ class Asteroid(CircleShape):
     def update(self, dt):
         self.position += self.velocity * dt 
     def split(self, score):
+        ExplosionRing(self.position.x, self.position.y, self.radius * 2)
         self.kill()
         if self.radius <= ASTEROID_MIN_RADIUS:
             score.add_points(POINTS_DESTROY)
