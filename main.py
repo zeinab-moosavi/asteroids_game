@@ -29,12 +29,15 @@ def main():
     asteroid_field = AsteroidField()
     score = Score()
     lives = Lives()
+    background = pygame.image.load("black.png")
+    background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
     while True:
         log_state()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return 
-        screen.fill("black")
+        #  screen.fill("black")
+        screen.blit(background, (0, 0))
         for drawable in drawables:
             drawable.draw(screen) 
         updatable.update(dt)
