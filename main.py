@@ -7,6 +7,7 @@ from shot import Shot
 from score import Score
 from asteroidField import AsteroidField
 from lives import Lives
+from weapon import Blaster, SpreadShot
 from explosion import ExplosionRing
 import sys
 def main():
@@ -35,7 +36,12 @@ def main():
         log_state()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                return 
+                return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    player.switch_weapon(Blaster())
+                if event.key == pygame.K_2:
+                    player.switch_weapon(SpreadShot())
         #  screen.fill("black")
         screen.blit(background, (0, 0))
         for drawable in drawables:

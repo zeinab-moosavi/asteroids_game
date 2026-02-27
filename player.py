@@ -1,14 +1,15 @@
 from circleshape import CircleShape
-from constants import PLAYER_RADIUS, LINE_WIDTH, PLAYER_TURN_SPEED, PLAYER_FRICTION, PLAYER_ACCELERATION,  PLAYER_SHOOT_SPEED, SHOT_RADIUS, PLAYER_SHOOT_COOLDOWN_SECONDS, SCREEN_WIDTH, SCREEN_HEIGHT
+from constants import PLAYER_RADIUS, LINE_WIDTH, PLAYER_TURN_SPEED, PLAYER_FRICTION, PLAYER_ACCELERATION, SCREEN_WIDTH, SCREEN_HEIGHT
 import pygame
 from shot import Shot
+from weapon import Blaster
 class Player(CircleShape):
     def __init__(self, x, y):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
-        self.shot_cooldown_timer = 0
         self.invincible_timer = 0
         self.velocity = pygame.Vector2(0, 0)
+        self.weapon = Blaster()
     def triangle(self):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         right = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
@@ -21,17 +22,17 @@ class Player(CircleShape):
     def rotate(self, dt):
         self.rotation += PLAYER_TURN_SPEED * dt
     def update(self, dt):
-        # 1. Handle Timers
+        self.weapon.update(dt)
+        #Handle Timers
         if self.invincible_timer > 0:
             self.invincible_timer -= dt
-        self.shot_cooldown_timer -= dt
-        # 2. Handle Rotation (Input)
+        # Handle Rotation (Input)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
             self.rotate(-dt)
         if keys[pygame.K_d]:
            self.rotate(dt)
-        # 3. Handle Acceleration (Input)
+        # Handle Acceleration (Input)
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         if keys[pygame.K_w]:
             self.velocity += forward * PLAYER_ACCELERATION * dt
@@ -44,13 +45,13 @@ class Player(CircleShape):
         # Wrap around screen
         self.wrap_position(SCREEN_WIDTH, SCREEN_HEIGHT)
         if keys[pygame.K_SPACE]:
-            if self.shot_cooldown_timer <= 0:
-                self.shot_cooldown_timer =  PLAYER_SHOOT_COOLDOWN_SECONDS
-                self.shoot()
+            self.shoot()
     def shoot(self):
-        shot = Shot(self.position.x, self.position.y , SHOT_RADIUS)
-        shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+        if self.weapon.can_fire():
+            self.weapon.fire(self.position, self.rotation)
     def make_invincible(self, duration=2):
         self.invincible_timer = duration
     def is_invincible(self):
         return self.invincible_timer > 0
+    def switch_weapon(self, new_weapon):
+        self.weapon = new_weapon
