@@ -55,3 +55,46 @@ class Player(CircleShape):
         return self.invincible_timer > 0
     def switch_weapon(self, new_weapon):
         self.weapon = new_weapon
+    def point_in_triangle(self, point):
+        """Check if a point is inside the player's triangle."""
+        a, b, c = self.triangle()
+        def sign(p1, p2, p3):
+            return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y)
+        d1 = sign(point, a, b)
+        d2 = sign(point, b, c)
+        d3 = sign(point, c, a)
+        has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0)
+        has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
+        return not (has_neg and has_pos)
+    def line_circle_intersect(self, circle_pos, circle_radius):
+        """Check if a circle intersects any of the triangle's edges."""
+        a, b, c = self.triangle()
+        edges = [(a, b), (b, c), (c, a)]
+        for line_start, line_end in edges:
+            # Vector from line start to end
+            line_vec = line_end - line_start
+            # Vector from line start to circle center
+            to_circle = circle_pos - line_start
+            # Project circle center onto the line
+            line_length_sq = line_vec.length_squared()
+            if line_length_sq == 0:
+                # Line is a point
+                if to_circle.length() <= circle_radius:
+                    return True
+                continue
+            # How far along the line is the closest point (0 to 1)
+            t = max(0, min(1, to_circle.dot(line_vec) / line_length_sq))
+            # Find the closest point on the line segment
+            closest_point = line_start + line_vec * t
+            # Check if that point is within the circle's radius
+            distance = (circle_pos - closest_point).length()
+            if distance <= circle_radius:
+                return True
+        return False
+    def collides_with(self, other):
+        """Check if this player's triangle collides with a circular object."""
+        if self.point_in_triangle(other.position):
+            return True
+        if self.line_circle_intersect(other.position, other.radius):
+            return True
+        return False

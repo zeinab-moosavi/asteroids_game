@@ -48,7 +48,7 @@ def main():
             drawable.draw(screen) 
         updatable.update(dt)
         for asteroid  in asteroids:
-            if asteroid.collides_with(player) and not player.is_invincible():
+            if player.collides_with(asteroid) and not player.is_invincible():
                 log_event("player_hit")
                 lives.lose_one()
                 if lives.is_alive():
