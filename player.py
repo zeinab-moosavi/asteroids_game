@@ -142,3 +142,5 @@ class Player(CircleShape):
         if self.bomb_count > 0:
             self.bomb_count -= 1
             Bomb(self.position.x, self.position.y)
+    def add_bombs(self, amount=2):
+        self.bomb_count += amount

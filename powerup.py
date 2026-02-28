@@ -22,3 +22,12 @@ class SpeedPowerUp(CircleShape):
         pygame.draw.circle(screen, "orange", self.position, self.radius // 2)
     def update(self, dt):
         pass
+class BombPowerUp(CircleShape):
+    def __init__(self, x, y):
+        super().__init__(x, y, 15)
+    def draw(self, screen):
+        # Draw as red to match bomb theme
+        pygame.draw.circle(screen, "red", self.position, self.radius, 2)
+        pygame.draw.circle(screen, "orange", self.position, self.radius // 2)
+    def update(self, dt):
+        pass

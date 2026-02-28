@@ -10,7 +10,7 @@ from lives import Lives
 from weapon import Blaster, SpreadShot
 from explosion import ExplosionRing
 import sys
-from powerup import ShieldPowerUp, SpeedPowerUp
+from powerup import ShieldPowerUp, SpeedPowerUp, BombPowerUp 
 from powerupSpawner import PowerUpSpawner
 from bomb import Bomb, BombExplosion
 from bomb_counter import BombCounter
@@ -34,6 +34,7 @@ def main():
     Player.containers = (updatable, drawables)
     ShieldPowerUp.containers = (powerups, updatable, drawables)
     SpeedPowerUp.containers = (powerups, updatable, drawables)
+    BombPowerUp.containers = (powerups, updatable, drawables)
     PowerUpSpawner.containers = (updatable)
     Bomb.containers = (bombs, updatable, drawables)
     BombExplosion.containers = (updatable, drawables)
@@ -88,6 +89,8 @@ def main():
                     player.activate_shield(5)
                 elif isinstance(powerup, SpeedPowerUp):
                     player.activate_speed_boost(5)
+                elif isinstance(powerup, BombPowerUp):
+                    player.add_bombs(2)  # Gives 2 extra bombs
                 powerup.kill()
         for bomb in bombs:
             if bomb.exploded:
