@@ -10,7 +10,7 @@ from lives import Lives
 from weapon import Blaster, SpreadShot
 from explosion import ExplosionRing
 import sys
-from powerup import ShieldPowerUp
+from powerup import ShieldPowerUp, SpeedPowerUp
 from powerupSpawner import PowerUpSpawner
 def main():
     pygame.init()
@@ -30,6 +30,7 @@ def main():
     Asteroid.containers = (asteroids, updatable, drawables)
     Player.containers = (updatable, drawables)
     ShieldPowerUp.containers = (powerups, updatable, drawables)
+    SpeedPowerUp.containers = (powerups, updatable, drawables)
     PowerUpSpawner.containers = (updatable,)
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     asteroid_field = AsteroidField()
@@ -74,7 +75,10 @@ def main():
                     asteroid.split(score)
         for powerup in powerups:
             if player.collides_with(powerup):
-                player.activate_shield(5)  # 5 seconds of protection
+                if isinstance(powerup, ShieldPowerUp):
+                    player.activate_shield(5)
+                elif isinstance(powerup, SpeedPowerUp):
+                    player.activate_speed_boost(5)
                 powerup.kill()
         pygame.display.flip()
         dt = clock.tick(60) / 1000

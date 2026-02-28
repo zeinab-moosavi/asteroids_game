@@ -12,6 +12,9 @@ class Player(CircleShape):
         self.weapon = Blaster()
         self.shield_active = False
         self.shield_timer = 0
+        self.speed_boost_active = False
+        self.speed_boost_timer = 0
+        self.speed_multiplier = 1.0
     def triangle(self):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         right = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
@@ -24,6 +27,12 @@ class Player(CircleShape):
         # Draw shield bubble when active
         if self.shield_active:
             pygame.draw.circle(screen, "cyan", self.position, self.radius + 10, 2)
+        # Speed boost - draw engine flame behind ship
+        if self.speed_boost_active:
+            backward = pygame.Vector2(0, -1).rotate(self.rotation)
+            flame_start = self.position + backward * self.radius
+            flame_end = self.position + backward * (self.radius + 20)
+            pygame.draw.line(screen, "orange", flame_start, flame_end, 3)
     def rotate(self, dt):
         self.rotation += PLAYER_TURN_SPEED * dt
     def update(self, dt):
@@ -36,6 +45,12 @@ class Player(CircleShape):
             self.shield_timer -= dt
         if self.shield_timer <= 0:
             self.shield_active = False
+        # Handle speed boost timer
+        if self.speed_boost_timer > 0:
+            self.speed_boost_timer -= dt
+        if self.speed_boost_timer <= 0:
+            self.speed_boost_active = False
+            self.speed_multiplier = 1.0
         # Handle Rotation (Input)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
@@ -45,9 +60,9 @@ class Player(CircleShape):
         # Handle Acceleration (Input)
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         if keys[pygame.K_w]:
-            self.velocity += forward * PLAYER_ACCELERATION * dt
+            self.velocity += forward * PLAYER_ACCELERATION * self.speed_multiplier * dt
         if keys[pygame.K_s]:
-            self.velocity -= forward * PLAYER_ACCELERATION * dt
+            self.velocity -= forward * PLAYER_ACCELERATION * self.speed_multiplier * dt
         # 4. Handle Physics (Movement and Friction)
         self.velocity *= (1 - PLAYER_FRICTION * dt)
         # Update the actual position
@@ -114,3 +129,10 @@ class Player(CircleShape):
 
     def has_shield(self):
         return self.shield_active
+    def activate_speed_boost(self, duration=5):
+        self.speed_boost_active = True
+        self.speed_boost_timer = duration
+        self.speed_multiplier = 2.0  # Double speed
+
+    def has_speed_boost(self):
+        return self.speed_boost_active

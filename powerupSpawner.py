@@ -1,7 +1,7 @@
 import pygame
 import random
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT
-from powerup import ShieldPowerUp
+from powerup import ShieldPowerUp, SpeedPowerUp
 class PowerUpSpawner(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(self.containers)
@@ -14,4 +14,8 @@ class PowerUpSpawner(pygame.sprite.Sprite):
             # Random position on screen
             x = random.randint(50, SCREEN_WIDTH - 50)
             y = random.randint(50, SCREEN_HEIGHT - 50)
-            ShieldPowerUp(x, y)
+            # Randomly choose which power-up to spawn
+            if random.choice([True, False]):
+                ShieldPowerUp(x, y)
+            else:
+                SpeedPowerUp(x, y)
