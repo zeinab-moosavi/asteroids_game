@@ -3,6 +3,7 @@ from constants import PLAYER_RADIUS, LINE_WIDTH, PLAYER_TURN_SPEED, PLAYER_FRICT
 import pygame
 from shot import Shot
 from weapon import Blaster
+from bomb import Bomb
 class Player(CircleShape):
     def __init__(self, x, y):
         super().__init__(x, y, PLAYER_RADIUS)
@@ -15,6 +16,7 @@ class Player(CircleShape):
         self.speed_boost_active = False
         self.speed_boost_timer = 0
         self.speed_multiplier = 1.0
+        self.bomb_count = 3  # Start with 3 bombs
     def triangle(self):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         right = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
@@ -136,3 +138,7 @@ class Player(CircleShape):
 
     def has_speed_boost(self):
         return self.speed_boost_active
+    def drop_bomb(self):
+        if self.bomb_count > 0:
+            self.bomb_count -= 1
+            Bomb(self.position.x, self.position.y)

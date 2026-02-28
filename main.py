@@ -12,6 +12,8 @@ from explosion import ExplosionRing
 import sys
 from powerup import ShieldPowerUp, SpeedPowerUp
 from powerupSpawner import PowerUpSpawner
+from bomb import Bomb, BombExplosion
+from bomb_counter import BombCounter
 def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -22,6 +24,7 @@ def main():
     asteroids = pygame.sprite.Group()
     shots = pygame.sprite.Group()
     powerups = pygame.sprite.Group()
+    bombs = pygame.sprite.Group()
     Shot.containers = (shots, updatable, drawables)
     Score.containers = (drawables, updatable)
     Lives.containers = (drawables, updatable)
@@ -31,8 +34,12 @@ def main():
     Player.containers = (updatable, drawables)
     ShieldPowerUp.containers = (powerups, updatable, drawables)
     SpeedPowerUp.containers = (powerups, updatable, drawables)
-    PowerUpSpawner.containers = (updatable,)
+    PowerUpSpawner.containers = (updatable)
+    Bomb.containers = (bombs, updatable, drawables)
+    BombExplosion.containers = (updatable, drawables)
+    BombCounter.containers = (updatable, drawables)
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+    bomb_counter = BombCounter(player)
     asteroid_field = AsteroidField()
     score = Score()
     lives = Lives()
@@ -49,6 +56,8 @@ def main():
                     player.switch_weapon(Blaster())
                 if event.key == pygame.K_2:
                     player.switch_weapon(SpreadShot())
+                if event.key == pygame.K_b:
+                    player.drop_bomb()
         #  screen.fill("black")
         screen.blit(background, (0, 0))
         for drawable in drawables:
@@ -80,6 +89,13 @@ def main():
                 elif isinstance(powerup, SpeedPowerUp):
                     player.activate_speed_boost(5)
                 powerup.kill()
+        for bomb in bombs:
+            if bomb.exploded:
+                BombExplosion(bomb.position.x, bomb.position.y, bomb.blast_radius)
+                # Destroy all asteroids in blast radius
+                for asteroid in bomb.get_asteroids_in_blast(asteroids):
+                     asteroid.split(score)
+                bomb.kill()
         pygame.display.flip()
         dt = clock.tick(60) / 1000
     print(f"Starting Asteroids with pygame version: {pygame.version.ver}")
