@@ -10,6 +10,8 @@ from lives import Lives
 from weapon import Blaster, SpreadShot
 from explosion import ExplosionRing
 import sys
+from powerup import ShieldPowerUp
+from powerupSpawner import PowerUpSpawner
 def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -19,6 +21,7 @@ def main():
     drawables = pygame.sprite.Group()
     asteroids = pygame.sprite.Group()
     shots = pygame.sprite.Group()
+    powerups = pygame.sprite.Group()
     Shot.containers = (shots, updatable, drawables)
     Score.containers = (drawables, updatable)
     Lives.containers = (drawables, updatable)
@@ -26,10 +29,13 @@ def main():
     AsteroidField.containers = (updatable)
     Asteroid.containers = (asteroids, updatable, drawables)
     Player.containers = (updatable, drawables)
+    ShieldPowerUp.containers = (powerups, updatable, drawables)
+    PowerUpSpawner.containers = (updatable,)
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     asteroid_field = AsteroidField()
     score = Score()
     lives = Lives()
+    powerup_spawner = PowerUpSpawner()
     background = pygame.image.load("black.png")
     background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
     while True:
@@ -48,7 +54,7 @@ def main():
             drawable.draw(screen) 
         updatable.update(dt)
         for asteroid  in asteroids:
-            if player.collides_with(asteroid) and not player.is_invincible():
+            if player.collides_with(asteroid) and not player.is_invincible() and not player.has_shield():
                 log_event("player_hit")
                 lives.lose_one()
                 if lives.is_alive():
@@ -66,6 +72,10 @@ def main():
                     log_event("asteroid_shot")
                     shot.kill()
                     asteroid.split(score)
+        for powerup in powerups:
+            if player.collides_with(powerup):
+                player.activate_shield(5)  # 5 seconds of protection
+                powerup.kill()
         pygame.display.flip()
         dt = clock.tick(60) / 1000
     print(f"Starting Asteroids with pygame version: {pygame.version.ver}")

@@ -10,6 +10,8 @@ class Player(CircleShape):
         self.invincible_timer = 0
         self.velocity = pygame.Vector2(0, 0)
         self.weapon = Blaster()
+        self.shield_active = False
+        self.shield_timer = 0
     def triangle(self):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         right = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
@@ -19,6 +21,9 @@ class Player(CircleShape):
         return [a, b, c]
     def draw(self, screen):
         pygame.draw.polygon(screen, "white", self.triangle(), LINE_WIDTH)
+        # Draw shield bubble when active
+        if self.shield_active:
+            pygame.draw.circle(screen, "cyan", self.position, self.radius + 10, 2)
     def rotate(self, dt):
         self.rotation += PLAYER_TURN_SPEED * dt
     def update(self, dt):
@@ -26,6 +31,11 @@ class Player(CircleShape):
         #Handle Timers
         if self.invincible_timer > 0:
             self.invincible_timer -= dt
+        # Handle shield timer
+        if self.shield_timer > 0:
+            self.shield_timer -= dt
+        if self.shield_timer <= 0:
+            self.shield_active = False
         # Handle Rotation (Input)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
@@ -98,3 +108,9 @@ class Player(CircleShape):
         if self.line_circle_intersect(other.position, other.radius):
             return True
         return False
+    def activate_shield(self, duration=5):
+        self.shield_active = True
+        self.shield_timer = duration
+
+    def has_shield(self):
+        return self.shield_active
